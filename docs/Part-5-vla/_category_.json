@@ -1,0 +1,8 @@
+{
+  "label": "Vision-Language-Action Systems",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "description": "The cutting edge: VLA pipelines that translate natural language commands into physical robot actions."
+  }
+}

@@ -1,0 +1,225 @@
+openapi: "3.1.0"
+info:
+  title: Textbook RAG Chatbot API
+  version: "3.0.0"
+  description: >
+    RAG chatbot API for the Humanoid Robotics: Physical AI textbook.
+    Supports full-book and selected-text retrieval modes with OpenRouter-powered
+    embeddings (Qwen3) and generation, orchestrated via OpenAI Agents SDK.
+
+servers:
+  - url: http://localhost:8000
+    description: Local development
+  - url: https://rag-chatbot.onrender.com
+    description: Production (Render)
+
+paths:
+  /health:
+    get:
+      operationId: healthCheck
+      summary: Check service connectivity
+      description: >
+        Reports connectivity status for Qdrant, Neon Postgres,
+        OpenRouter Embedding API, and OpenRouter Chat API.
+      responses:
+        "200":
+          description: Health status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  /query:
+    post:
+      operationId: queryHandler
+      summary: Ask the textbook chatbot a question
+      description: >
+        Accepts a natural language question with optional selected text
+        for context-aware retrieval. Returns a grounded answer with citations.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QueryRequest"
+      responses:
+        "200":
+          description: Successful answer with citations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueryResponse"
+        "422":
+          description: Missing question field
+        "503":
+          description: Service unavailable (vector DB, embedding, or LLM)
+
+  /ingest:
+    post:
+      operationId: triggerIngestion
+      summary: Trigger content ingestion pipeline
+      description: >
+        Processes textbook Markdown files into Qdrant vector DB.
+        Supports full re-indexing and selective chapter re-indexing.
+        Only one ingestion can run at a time (FR-016).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IngestRequest"
+      responses:
+        "200":
+          description: Ingestion completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestResponse"
+        "409":
+          description: Ingestion already in progress
+        "500":
+          description: Ingestion failed
+
+components:
+  schemas:
+    QueryRequest:
+      type: object
+      properties:
+        question:
+          type: string
+          maxLength: 2000
+          description: Natural language question about the textbook
+        query:
+          type: string
+          description: Alias for question (backwards compatibility)
+        selected_text:
+          type: string
+          maxLength: 5000
+          description: >
+            User-highlighted text from the textbook page.
+            When provided, activates selected-text retrieval mode.
+        session_id:
+          type: string
+          format: uuid
+          description: >
+            Client-generated session UUID for multi-turn conversation tracking.
+            If omitted, a new session is created.
+      oneOf:
+        - required: [question]
+        - required: [query]
+
+    QueryResponse:
+      type: object
+      required: [answer, sources, latency_ms, retrieval_mode]
+      properties:
+        answer:
+          type: string
+          description: Generated answer grounded in textbook content
+        sources:
+          type: array
+          items:
+            $ref: "#/components/schemas/SourceCitation"
+          description: Cited source passages
+        latency_ms:
+          type: number
+          format: float
+          description: End-to-end response latency in milliseconds
+        retrieval_mode:
+          type: string
+          enum: [full_book, selected_text]
+          description: Which retrieval mode was used
+        session_id:
+          type: string
+          format: uuid
+          description: Session ID (returned for client tracking)
+
+    SourceCitation:
+      type: object
+      properties:
+        text:
+          type: string
+          description: Truncated passage text (first 200 chars)
+        source:
+          type: string
+          description: Source file path
+        part:
+          type: string
+          description: Part title
+        part_number:
+          type: integer
+          description: Part sequence number
+        section:
+          type: string
+          description: Section heading
+        chunk_index:
+          type: integer
+          description: Chunk position
+        is_primary:
+          type: boolean
+          description: >
+            True if this source is from the selected text (selected_text mode).
+            False for supplementary passages.
+
+    IngestRequest:
+      type: object
+      properties:
+        chapters:
+          type: array
+          items:
+            type: string
+          description: >
+            Optional list of chapter paths for selective re-indexing.
+            If omitted, all chapters are re-indexed.
+
+    IngestResponse:
+      type: object
+      required: [run_id, status, total_chapters, total_passages, duration_seconds, chapters]
+      properties:
+        run_id:
+          type: integer
+        status:
+          type: string
+          enum: [completed, failed]
+        total_chapters:
+          type: integer
+        total_passages:
+          type: integer
+        duration_seconds:
+          type: number
+          format: float
+        chapters:
+          type: array
+          items:
+            type: object
+            properties:
+              source_path:
+                type: string
+              status:
+                type: string
+              passages_created:
+                type: integer
+              error:
+                type: string
+
+    HealthResponse:
+      type: object
+      required: [status, services]
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        services:
+          type: object
+          properties:
+            qdrant:
+              type: string
+              enum: [connected, disconnected]
+            neon:
+              type: string
+              enum: [connected, disconnected]
+            embedding_api:
+              type: string
+              enum: [available, unavailable]
+            chat_api:
+              type: string
+              enum: [available, unavailable]

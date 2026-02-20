@@ -1,0 +1,90 @@
+:root {
+  --ifm-color-primary: #1a73e8;
+  --ifm-color-primary-dark: #1765d0;
+  --ifm-color-primary-darker: #155fc4;
+  --ifm-color-primary-darkest: #114ea1;
+  --ifm-color-primary-light: #2d80eb;
+  --ifm-color-primary-lighter: #3987ec;
+  --ifm-color-primary-lightest: #5c9ef0;
+  --ifm-code-font-size: 95%;
+  --ifm-font-family-base: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --ifm-font-family-monospace: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --ifm-navbar-height: 60px;
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #4da6ff;
+  --ifm-color-primary-dark: #2e97ff;
+  --ifm-color-primary-darker: #1f8fff;
+  --ifm-color-primary-darkest: #0077f0;
+  --ifm-color-primary-light: #6cb5ff;
+  --ifm-color-primary-lighter: #7bbdff;
+  --ifm-color-primary-lightest: #aad5ff;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* Clean, instrument-like typography */
+article {
+  max-width: 48rem;
+}
+
+article h1 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+article h2 {
+  font-weight: 600;
+  margin-top: 2rem;
+}
+
+/* Readable code blocks */
+pre {
+  border-radius: 8px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+code {
+  border-radius: 4px;
+}
+
+/* Sidebar width */
+.theme-doc-sidebar-container {
+  --doc-sidebar-width: 280px;
+}
+
+/* Table styling */
+table {
+  display: table;
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+table th {
+  font-weight: 600;
+}
+
+/* RTL adjustments for Urdu locale */
+[dir='rtl'] pre {
+  direction: ltr;
+  text-align: left;
+}
+
+[dir='rtl'] code {
+  direction: ltr;
+}
+
+[dir='rtl'] .theme-doc-sidebar-container {
+  border-left: 1px solid var(--ifm-color-emphasis-200);
+  border-right: none;
+}
+
+[dir='rtl'] .navbar__items {
+  flex-direction: row-reverse;
+}
+
+[dir='rtl'] article {
+  text-align: right;
+}

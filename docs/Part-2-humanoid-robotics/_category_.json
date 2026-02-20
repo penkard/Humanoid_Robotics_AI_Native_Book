@@ -1,0 +1,8 @@
+{
+  "label": "Basics of Humanoid Robotics",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "description": "Foundations of humanoid robotics: ROS 2 basics, URDF modeling, kinematics, locomotion, and manipulation."
+  }
+}

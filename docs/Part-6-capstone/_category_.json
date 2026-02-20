@@ -1,0 +1,8 @@
+{
+  "label": "Capstone",
+  "position": 6,
+  "link": {
+    "type": "generated-index",
+    "description": "Integrate everything: build an autonomous humanoid that perceives, plans, navigates, and manipulates."
+  }
+}

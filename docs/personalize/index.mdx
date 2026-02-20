@@ -1,0 +1,161 @@
+---
+sidebar_position: 1
+title: "Personalize Your Learning"
+---
+
+import React, { useState } from 'react';
+
+# Personalize Your Learning
+
+Answer the following questions to find your recommended starting point in the textbook.
+
+export const SelfAssessment = () => {
+  const [answers, setAnswers] = useState({});
+  const [result, setResult] = useState(null);
+
+  const questions = [
+    {
+      id: 'ros2',
+      text: 'Have you used ROS 2 before (nodes, topics, services)?',
+      options: ['No experience', 'Basic understanding', 'Hands-on experience'],
+    },
+    {
+      id: 'simulation',
+      text: 'Have you worked with Gazebo or Unity for robot simulation?',
+      options: ['No experience', 'Basic understanding', 'Hands-on experience'],
+    },
+    {
+      id: 'isaac',
+      text: 'Are you familiar with NVIDIA Isaac Sim or Isaac ROS?',
+      options: ['No experience', 'Basic understanding', 'Hands-on experience'],
+    },
+    {
+      id: 'vla',
+      text: 'Have you worked with LLMs for robot task planning (VLA/embodied AI)?',
+      options: ['No experience', 'Basic understanding', 'Hands-on experience'],
+    },
+    {
+      id: 'robotics',
+      text: 'What is your general robotics experience level?',
+      options: ['Beginner', 'Intermediate', 'Advanced'],
+    },
+  ];
+
+  const handleAnswer = (questionId, value) => {
+    setAnswers(prev => ({ ...prev, [questionId]: value }));
+  };
+
+  const calculatePath = () => {
+    const exp = (id) => answers[id] || 'No experience';
+    const isExperienced = (id) => exp(id) === 'Hands-on experience';
+
+    if (isExperienced('ros2') && isExperienced('simulation') && isExperienced('isaac')) {
+      setResult({
+        start: 'Part 5: Vision-Language-Action Systems',
+        path: '/docs/Part-5-vla/vla-overview',
+        description: 'You have strong foundations. Jump to the cutting edge: VLA pipelines and voice-to-action systems. Then tackle the Capstone.',
+        modules: ['Part 5: VLA', 'Part 6: Capstone'],
+      });
+    } else if (isExperienced('ros2') && isExperienced('simulation')) {
+      setResult({
+        start: 'Part 4: Digital Twin Simulation',
+        path: '/docs/Part-4-digital-twin/gazebo',
+        description: 'You know ROS 2 and simulation basics. Start with Isaac Sim integration, then proceed through VLA to the Capstone.',
+        modules: ['Part 4: Digital Twin', 'Part 5: VLA', 'Part 6: Capstone'],
+      });
+    } else if (isExperienced('ros2')) {
+      setResult({
+        start: 'Part 4: Digital Twin Simulation',
+        path: '/docs/Part-4-digital-twin/gazebo',
+        description: 'You have ROS 2 experience. Start with simulation environments, then proceed through VLA and the Capstone.',
+        modules: ['Part 4: Digital Twin', 'Part 5: VLA', 'Part 6: Capstone'],
+      });
+    } else if (exp('robotics') === 'Advanced') {
+      setResult({
+        start: 'Part 2: Basics of Humanoid Robotics',
+        path: '/docs/Part-2-humanoid-robotics/ros2-basics',
+        description: 'With advanced robotics knowledge, you can skim the introduction and start with humanoid-specific concepts and ROS 2.',
+        modules: ['Part 2: Humanoid Robotics', 'Part 3: ROS 2', 'Part 4: Digital Twin', 'Part 5: VLA', 'Part 6: Capstone'],
+      });
+    } else {
+      setResult({
+        start: 'Part 1: Introduction to Physical AI',
+        path: '/docs/Part-1-introduction/overview',
+        description: 'Start from the beginning for the full learning experience. Each part builds on the previous one.',
+        modules: ['Part 1: Introduction', 'Part 2: Humanoid Robotics', 'Part 3: ROS 2', 'Part 4: Digital Twin', 'Part 5: VLA', 'Part 6: Capstone'],
+      });
+    }
+  };
+
+  const allAnswered = Object.keys(answers).length === questions.length;
+
+  return (
+    <div>
+      {questions.map((q) => (
+        <div key={q.id} style={{ marginBottom: '1.5rem' }}>
+          <p style={{ fontWeight: 600 }}>{q.text}</p>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            {q.options.map((opt) => (
+              <button
+                key={opt}
+                onClick={() => handleAnswer(q.id, opt)}
+                style={{
+                  padding: '0.5rem 1rem',
+                  borderRadius: '6px',
+                  border: answers[q.id] === opt
+                    ? '2px solid var(--ifm-color-primary)'
+                    : '1px solid var(--ifm-color-emphasis-300)',
+                  background: answers[q.id] === opt
+                    ? 'var(--ifm-color-primary)'
+                    : 'transparent',
+                  color: answers[q.id] === opt ? '#fff' : 'inherit',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                }}
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+      <button
+        onClick={calculatePath}
+        disabled={!allAnswered}
+        style={{
+          padding: '0.75rem 2rem',
+          borderRadius: '8px',
+          background: allAnswered ? 'var(--ifm-color-primary)' : 'var(--ifm-color-emphasis-300)',
+          color: '#fff',
+          border: 'none',
+          cursor: allAnswered ? 'pointer' : 'not-allowed',
+          fontSize: '1rem',
+          fontWeight: 600,
+        }}
+      >
+        Get My Learning Path
+      </button>
+      {result && (
+        <div style={{
+          marginTop: '2rem',
+          padding: '1.5rem',
+          borderRadius: '8px',
+          border: '2px solid var(--ifm-color-primary)',
+          background: 'var(--ifm-color-emphasis-100)',
+        }}>
+          <h3>Your Recommended Starting Point</h3>
+          <p><strong><a href={result.path}>{result.start}</a></strong></p>
+          <p>{result.description}</p>
+          <h4>Your Path:</h4>
+          <ol>
+            {result.modules.map((mod, i) => (
+              <li key={i}>{mod}</li>
+            ))}
+          </ol>
+        </div>
+      )}
+    </div>
+  );
+};
+
+<SelfAssessment />

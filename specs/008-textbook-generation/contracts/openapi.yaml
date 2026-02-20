@@ -1,0 +1,210 @@
+openapi: 3.1.0
+info:
+  title: Textbook RAG Chatbot API
+  version: 2.0.0
+  description: >
+    Backend API for the AI-native humanoid robotics textbook.
+    Provides chatbot query handling and content ingestion.
+
+servers:
+  - url: http://localhost:8000
+    description: Local development
+
+paths:
+  /query:
+    post:
+      summary: Ask the chatbot a question
+      description: >
+        Accepts a natural language question, retrieves relevant passages from the
+        textbook via semantic search, and generates a grounded answer with source citations.
+      operationId: handleQuery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRequest'
+      responses:
+        '200':
+          description: Successful answer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+        '422':
+          description: Missing question field
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Backend services unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /ingest:
+    post:
+      summary: Trigger content ingestion
+      description: >
+        Initiates ingestion of all Markdown chapter files from the docs directory.
+        Processes chapters, generates embeddings, and stores passages in Qdrant.
+        Returns the ingestion run summary.
+      operationId: triggerIngestion
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestRequest'
+      responses:
+        '200':
+          description: Ingestion completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestResponse'
+        '409':
+          description: Ingestion already in progress
+        '500':
+          description: Ingestion failed
+
+  /health:
+    get:
+      summary: Health check
+      description: Returns service health including Qdrant and Neon connectivity.
+      operationId: healthCheck
+      responses:
+        '200':
+          description: All services healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  schemas:
+    QueryRequest:
+      type: object
+      properties:
+        question:
+          type: string
+          description: The learner's natural language question
+          example: "What is a URDF model?"
+        query:
+          type: string
+          description: Alias for question (backwards compatibility)
+      anyOf:
+        - required: [question]
+        - required: [query]
+
+    QueryResponse:
+      type: object
+      required: [answer, sources, latency_ms]
+      properties:
+        answer:
+          type: string
+          description: Generated answer grounded in book content
+        sources:
+          type: array
+          items:
+            $ref: '#/components/schemas/SourcePassage'
+          description: Cited source passages used to generate the answer
+        latency_ms:
+          type: number
+          format: float
+          description: Total response time in milliseconds
+
+    SourcePassage:
+      type: object
+      required: [text, source, part, section]
+      properties:
+        text:
+          type: string
+          description: Passage text content
+        source:
+          type: string
+          description: Relative file path of the source chapter
+        part:
+          type: string
+          description: Part name (e.g., "ROS 2 Fundamentals")
+        part_number:
+          type: integer
+          description: Part sequence number (1-6)
+        section:
+          type: string
+          description: Section heading within the chapter
+        chunk_index:
+          type: integer
+
+    IngestRequest:
+      type: object
+      properties:
+        chapters:
+          type: array
+          items:
+            type: string
+          description: >
+            Optional list of specific chapter file paths to re-ingest.
+            If omitted, all chapters are ingested.
+
+    IngestResponse:
+      type: object
+      required: [run_id, status, total_chapters, total_passages]
+      properties:
+        run_id:
+          type: integer
+          description: Ingestion run ID
+        status:
+          type: string
+          enum: [completed, failed]
+        total_chapters:
+          type: integer
+        total_passages:
+          type: integer
+        duration_seconds:
+          type: number
+          format: float
+        chapters:
+          type: array
+          items:
+            type: object
+            properties:
+              source_path:
+                type: string
+              status:
+                type: string
+                enum: [success, skipped, failed]
+              passages_created:
+                type: integer
+              error:
+                type: string
+
+    HealthResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        services:
+          type: object
+          properties:
+            qdrant:
+              type: string
+              enum: [connected, disconnected]
+            neon:
+              type: string
+              enum: [connected, disconnected]
+            embedding_api:
+              type: string
+              enum: [available, unavailable]
+
+    ErrorResponse:
+      type: object
+      required: [detail]
+      properties:
+        detail:
+          type: string
+          description: Human-readable error message

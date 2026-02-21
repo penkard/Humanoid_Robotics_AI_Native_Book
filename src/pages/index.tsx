@@ -1,74 +1,182 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
 
-const parts = [
+// ─── Process card data ────────────────────────────────────────────────────────
+
+const processCards = [
   {
-    title: 'Part 1: Introduction to Physical AI',
-    path: '/docs/Part-1-introduction/overview',
-    description: 'The era of Embodied Intelligence — AI systems that perceive, reason, and act in the physical world.',
+    step: '01',
+    title: 'Build',
+    description:
+      'Turn your workflows into task-capable humanoids ready for the real world.',
   },
   {
-    title: 'Part 2: Basics of Humanoid Robotics',
-    path: '/docs/Part-2-humanoid-robotics/ros2-basics',
-    description: 'Foundations of humanoid robotics: ROS 2 basics, URDF modeling, kinematics, and locomotion.',
+    step: '02',
+    title: 'Deploy',
+    description:
+      'Install on-site or operate as a managed robotic fleet.',
   },
   {
-    title: 'Part 3: ROS 2 Fundamentals',
-    path: '/docs/Part-3-ros2/nodes-topics',
-    description: 'Deep dive into nodes, topics, services, actions, and URDF humanoid modeling.',
-  },
-  {
-    title: 'Part 4: Digital Twin Simulation',
-    path: '/docs/Part-4-digital-twin/gazebo',
-    description: 'Physics simulation with Gazebo, photorealistic rendering with NVIDIA Isaac Sim.',
-  },
-  {
-    title: 'Part 5: Vision-Language-Action Systems',
-    path: '/docs/Part-5-vla/vla-overview',
-    description: 'VLA pipelines that translate natural language commands into physical robot actions.',
-  },
-  {
-    title: 'Part 6: Capstone',
-    path: '/docs/Part-6-capstone/capstone-project',
-    description: 'Integrate everything: perception, planning, navigation, and manipulation.',
+    step: '03',
+    title: 'Expand',
+    description:
+      'Scale across facilities with recurring contracts and performance-based pricing.',
   },
 ];
 
-export default function Home(): React.ReactElement {
-  return (
-    <Layout title="Home" description="Humanoid Robotics: Physical AI">
-      <main style={{maxWidth: 800, margin: '0 auto', padding: '2rem 1rem'}}>
-        <div style={{textAlign: 'center', marginBottom: '3rem'}}>
-          <h1>Humanoid Robotics: Physical AI</h1>
-          <p style={{fontSize: '1.2rem', color: 'var(--ifm-color-emphasis-700)'}}>
-            Build humanoid robots that perceive, reason, and act in the real world.
-          </p>
-        </div>
+// ─── Footer social icons (inline SVG placeholders) ───────────────────────────
 
-        <h2>Table of Contents</h2>
-        <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
-          {parts.map((part, idx) => (
-            <Link
-              key={idx}
-              to={part.path}
-              style={{
-                display: 'block',
-                padding: '1rem 1.5rem',
-                borderRadius: '8px',
-                border: '1px solid var(--ifm-color-emphasis-300)',
-                textDecoration: 'none',
-                color: 'inherit',
-              }}
-            >
-              <strong>{part.title}</strong>
-              <p style={{margin: '0.5rem 0 0', fontSize: '0.9rem', color: 'var(--ifm-color-emphasis-600)'}}>
-                {part.description}
-              </p>
-            </Link>
-          ))}
+function YouTubeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="footer__social-icon" xmlns="http://www.w3.org/2000/svg">
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+    </svg>
+  );
+}
+
+function LinkedInIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="footer__social-icon" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+    </svg>
+  );
+}
+
+function InstagramIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="footer__social-icon" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z" />
+    </svg>
+  );
+}
+
+function FacebookIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="footer__social-icon" xmlns="http://www.w3.org/2000/svg">
+      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+    </svg>
+  );
+}
+
+// ─── Custom footer (replaces Docusaurus default) ─────────────────────────────
+
+function CustomFooter() {
+  return (
+    <footer className="footer">
+      <span className="footer__centerpiece">Built To Think</span>
+
+      <div className="footer__social">
+        <a href="https://youtube.com" aria-label="YouTube">
+          <YouTubeIcon />
+        </a>
+        <a href="https://linkedin.com" aria-label="LinkedIn">
+          <LinkedInIcon />
+        </a>
+        <a href="https://instagram.com" aria-label="Instagram">
+          <InstagramIcon />
+        </a>
+        <a href="https://facebook.com" aria-label="Facebook">
+          <FacebookIcon />
+        </a>
+      </div>
+
+      <p className="footer__copyright">
+        © 2026 Built to Think. Open Source Education.
+      </p>
+    </footer>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
+export default function Home(): React.ReactElement {
+  // Make navbar transparent on the homepage and restore on scroll
+  useEffect(() => {
+    const navbar = document.querySelector('.navbar') as HTMLElement | null;
+    if (!navbar) return;
+
+    navbar.style.background = 'transparent';
+    navbar.style.boxShadow = 'none';
+    navbar.style.borderBottom = 'none';
+
+    const onScroll = () => {
+      if (window.scrollY > 60) {
+        navbar.style.background = 'rgba(0,0,0,0.7)';
+        navbar.style.backdropFilter = 'blur(12px)';
+      } else {
+        navbar.style.background = 'transparent';
+        navbar.style.backdropFilter = 'none';
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, {passive: true});
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      navbar.style.background = '';
+      navbar.style.boxShadow = '';
+      navbar.style.borderBottom = '';
+      navbar.style.backdropFilter = '';
+    };
+  }, []);
+
+  return (
+    <Layout
+      title="Built to Think"
+      description="Engineering intelligence that moves through the world"
+      noFooter
+    >
+      {/* ── Section 1: Hero ── */}
+      <section className="hero-section">
+        {/* Background video */}
+        <video
+          className="hero-video"
+          autoPlay
+          muted
+          loop
+          playsInline
+          src="/video/hero.mp4"
+        />
+
+        {/* Gradient overlay */}
+        <div className="hero-overlay" />
+
+        {/* Text content */}
+        <div className="hero-content">
+          <h1 className="hero-heading">Built to Think</h1>
+          <p className="hero-tagline">
+            Engineering intelligence that moves through the world
+          </p>
+          <Link className="hero-cta" to="/docs/Part-1-introduction/overview">
+            Start Reading
+          </Link>
         </div>
-      </main>
+      </section>
+
+      {/* ── Section 2: Process Grid ── */}
+      <section className="process-section">
+        <div className="process-inner">
+          <h2 className="process-heading">
+            Deploy Physical Intelligence That Works in the Real World
+          </h2>
+          <p className="process-subheading">
+            Turn robotics from research into revenue-generating physical systems
+          </p>
+
+          <div className="process-grid">
+            {processCards.map((card) => (
+              <div key={card.step} className="process-card">
+                <p className="process-card-step">{card.step}</p>
+                <h3 className="process-card-title">{card.title}</h3>
+                <p className="process-card-desc">{card.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Custom footer ── */}
+      <CustomFooter />
     </Layout>
   );
 }

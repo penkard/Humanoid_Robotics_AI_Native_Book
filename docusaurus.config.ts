@@ -3,9 +3,9 @@ import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
-  title: 'Physical AI',
-  tagline: 'Build humanoid robots that perceive, reason, and act',
-  favicon: 'img/favicon.ico',
+  title: 'Built to Think',
+  tagline: 'Engineering intelligence that moves through the world',
+  favicon: 'img/logo.png',
 
   future: {
     v4: true,
@@ -19,10 +19,9 @@ const config: Config = {
 
   i18n: {
     defaultLocale: 'en',
-    locales: ['en', 'ur'],
+    locales: ['en'],
     localeConfigs: {
       en: { label: 'English' },
-      ur: { label: '\u0627\u0631\u062F\u0648', direction: 'rtl' },
     },
   },
 
@@ -45,10 +44,18 @@ const config: Config = {
   themeConfig: {
     colorMode: {
       defaultMode: 'dark',
-      respectPrefersColorScheme: true,
+      disableSwitch: false,
+      respectPrefersColorScheme: false,
     },
     navbar: {
-      title: 'Physical AI',
+      title: '',
+      logo: {
+        alt: 'Built to Think logo',
+        src: 'img/logo.png',
+        style: {height: '28px', width: '28px', objectFit: 'contain'},
+      },
+      style: 'dark',
+      hideOnScroll: false,
       items: [
         {
           type: 'docSidebar',
@@ -57,33 +64,28 @@ const config: Config = {
           label: 'Textbook',
         },
         {
-          type: 'localeDropdown',
+          label: 'Learn',
+          position: 'left',
+          to: '/docs/Part-1-introduction/overview',
+        },
+        {
+          href: 'https://github.com/penkard/Humanoid_Robotics_AI_Native_Book',
+          label: 'GitHub',
           position: 'right',
         },
         {
-          href: 'https://github.com/penkard/Humanoid_Robotics_Native_book',
-          label: 'GitHub',
+          type: 'html',
           position: 'right',
+          value: '<a href="/docs/Part-1-introduction/overview" class="navbar__login-btn">Log in</a>',
         },
       ],
     },
     footer: {
       style: 'dark',
-      links: [
-        {
-          title: 'Book',
-          items: [
-            {
-              label: 'Introduction',
-              to: '/docs/Part-1-introduction/overview',
-            },
-          ],
-        },
-      ],
-      copyright: `Copyright © ${new Date().getFullYear()} Physical AI Textbook. Built with Docusaurus.`,
+      copyright: `© ${new Date().getFullYear()} Physical AI`,
     },
     prism: {
-      theme: prismThemes.github,
+      theme: prismThemes.dracula,
       darkTheme: prismThemes.dracula,
       additionalLanguages: ['python', 'bash', 'yaml'],
     },

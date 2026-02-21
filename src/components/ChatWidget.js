@@ -1,8 +1,13 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 
-const API_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-  ? 'http://localhost:8000'
-  : (typeof window !== 'undefined' ? window.CHATBOT_API_URL || 'http://localhost:8000' : 'http://localhost:8000');
+function useApiUrl() {
+  const { siteConfig } = useDocusaurusContext();
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    return 'http://localhost:8000';
+  }
+  return siteConfig.customFields?.chatbotApiUrl || 'http://localhost:8000';
+}
 
 // Generate a persistent session ID per browser tab
 function getSessionId() {
@@ -168,6 +173,7 @@ function sourceToDocPath(source) {
 }
 
 export default function ChatWidget() {
+  const API_URL = useApiUrl();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');

@@ -41,6 +41,11 @@ const config: Config = {
     ],
   ],
 
+  customFields: {
+    // Set CHATBOT_API_URL in Vercel env vars after backend is deployed to Render
+    chatbotApiUrl: process.env.CHATBOT_API_URL || 'http://localhost:8000',
+  },
+
   themeConfig: {
     colorMode: {
       defaultMode: 'dark',

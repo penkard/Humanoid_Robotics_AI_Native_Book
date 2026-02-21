@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: physical-ai-chatbot
+    runtime: python
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: QDRANT_URL
+        sync: false
+      - key: QDRANT_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: EMBEDDING_BACKEND
+        value: hf
+      - key: HF_API_TOKEN
+        sync: false
+      - key: HF_EMBED_MODEL
+        value: sentence-transformers/all-mpnet-base-v2
+      - key: EMBEDDING_DIMENSIONS
+        value: "768"
+      - key: OPENROUTER_CHAT_MODEL
+        value: qwen/qwen3-30b-a3b

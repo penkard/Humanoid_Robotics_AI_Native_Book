@@ -1,7 +1,8 @@
-fastapi
-uvicorn
-qdrant-client
-python-dotenv
-openai
-openai-agents
-psycopg2-binary
+fastapi==0.115.6
+uvicorn==0.32.1
+qdrant-client==1.12.1
+python-dotenv==1.0.1
+openai==1.57.0
+openai-agents==0.0.6
+psycopg2-binary==2.9.10
+requests==2.32.3

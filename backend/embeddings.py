@@ -23,7 +23,7 @@ OLLAMA_MODEL = os.getenv("OLLAMA_EMBED_MODEL", "nomic-embed-text")
 # HuggingFace settings (production fallback)
 HF_API_TOKEN = os.getenv("HUGGING_FACE_API_KEY") or os.getenv("HF_API_TOKEN", "")
 HF_MODEL = os.getenv("HF_EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
-HF_API_URL = f"https://api-inference.huggingface.co/pipeline/feature-extraction/{HF_MODEL}"
+HF_API_URL = f"https://router.huggingface.co/pipeline/feature-extraction/{HF_MODEL}"
 
 # Resolved at import time so ingest.py can reference it for VECTOR_DIM
 EMBEDDING_DIMENSIONS = int(os.getenv("EMBEDDING_DIMENSIONS", "768"))

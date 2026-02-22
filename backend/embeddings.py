@@ -22,8 +22,8 @@ OLLAMA_MODEL = os.getenv("OLLAMA_EMBED_MODEL", "nomic-embed-text")
 
 # HuggingFace settings (production fallback)
 HF_API_TOKEN = os.getenv("HUGGING_FACE_API_KEY") or os.getenv("HF_API_TOKEN", "")
-HF_MODEL = os.getenv("HF_EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
-HF_API_URL = f"https://router.huggingface.co/pipeline/feature-extraction/{HF_MODEL}"
+HF_MODEL = os.getenv("HF_EMBED_MODEL", "BAAI/bge-base-en-v1.5")
+HF_API_URL = f"https://router.huggingface.co/hf-inference/models/{HF_MODEL}"
 
 # Resolved at import time so ingest.py can reference it for VECTOR_DIM
 EMBEDDING_DIMENSIONS = int(os.getenv("EMBEDDING_DIMENSIONS", "768"))
@@ -50,20 +50,25 @@ def _embed_ollama(texts: list[str]) -> list[list[float]]:
 
 
 def _embed_hf(texts: list[str]) -> list[list[float]]:
-    """Embed texts using HuggingFace Inference API."""
-    headers = {"Authorization": f"Bearer {HF_API_TOKEN}"} if HF_API_TOKEN else {}
+    """Embed texts using HuggingFace Inference API (router.huggingface.co)."""
+    headers = {"Authorization": f"Bearer {HF_API_TOKEN}", "Content-Type": "application/json"}
     all_embeddings: list[list[float]] = []
     for i in range(0, len(texts), BATCH_SIZE):
         batch = texts[i : i + BATCH_SIZE]
         resp = requests.post(
             HF_API_URL,
             headers=headers,
-            json={"inputs": batch, "options": {"wait_for_model": True}},
+            json={"inputs": batch},
             timeout=60,
         )
         if not resp.ok:
             raise RuntimeError(f"HF embedding API error {resp.status_code}: {resp.text}")
-        all_embeddings.extend(resp.json())
+        result = resp.json()
+        # Router returns list of embeddings directly
+        if isinstance(result, list) and isinstance(result[0], list):
+            all_embeddings.extend(result)
+        else:
+            raise RuntimeError(f"Unexpected HF embedding response shape: {str(result)[:200]}")
     return all_embeddings
 
 

@@ -21,7 +21,7 @@ OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_EMBED_MODEL", "nomic-embed-text")
 
 # HuggingFace settings (production fallback)
-HF_API_TOKEN = os.getenv("HF_API_TOKEN", "")
+HF_API_TOKEN = os.getenv("HUGGING_FACE_API_KEY") or os.getenv("HF_API_TOKEN", "")
 HF_MODEL = os.getenv("HF_EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
 HF_API_URL = f"https://api-inference.huggingface.co/pipeline/feature-extraction/{HF_MODEL}"
 
